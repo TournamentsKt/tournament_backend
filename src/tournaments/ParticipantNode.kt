@@ -1,7 +1,6 @@
-package com.minz
+package com.minz.tournaments
 
-class ParticipantNode constructor(participant: Participant = Participant()) {
-    val participant = participant
+class ParticipantNode constructor(val participant: Participant = Participant()) {
     var linkedMatch: Match? = null
 
     var left: ParticipantNode? = null
