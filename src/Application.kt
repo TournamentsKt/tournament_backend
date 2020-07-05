@@ -6,7 +6,10 @@ import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.content.TextContent
+import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
+import io.ktor.serialization.json
+import io.ktor.serialization.serialization
 import io.ktor.server.netty.EngineMain
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.builtins.list
@@ -23,9 +26,6 @@ fun Application.module(testing: Boolean = false) {
     val numDummyParticipants = 32
     val testParticipants = HashMap<Int, Participant>(numDummyParticipants)
 
-    // json stuff
-    val json = Json(JsonConfiguration.Default)
-
     for (i in 0 until numDummyParticipants) {
         testParticipants[i] = Participant("P$i")
     }
@@ -36,15 +36,17 @@ fun Application.module(testing: Boolean = false) {
         print("TESTING MODE ACTIVE")
     }
 
+    install(ContentNegotiation) {
+        json()
+    }
+
     routing {
         get("$apiRoot/tournamentlo") {
-            call.respond(TextContent(json.stringify(Participant.serializer().list, tournament.getRoundsFlat()),
-                ContentType.Application.Json))
+            call.respond(tournament.getRoundsFlat())
         }
 
         get("$apiRoot/participants") {
-            call.respond(TextContent(json.stringify(Participant.serializer().list,
-                tournament.participants.values.toList()), ContentType.Application.Json))
+            call.respond(tournament.participants.values.toList())
         }
 
         post("$apiRoot/register") {
